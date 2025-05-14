@@ -5,6 +5,7 @@ const connectDB = require('./Database/DBconnect');
 const serverless = require('serverless-http');
 
 dotenv.config();
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

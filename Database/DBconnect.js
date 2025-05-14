@@ -7,8 +7,7 @@ let isConnected = false;
 
 const connectDB = async () => {
   if (isConnected) {
-    console.log('Using existing database connection');
-    return;
+    return Promise.resolve();
   }
 
   try {
@@ -17,24 +16,25 @@ const connectDB = async () => {
       useUnifiedTopology: true,
       bufferCommands: false,
       serverSelectionTimeoutMS: 5000,
-      maxPoolSize: 1
+      maxPoolSize: 1,
+      socketTimeoutMS: 10000,
+      connectTimeoutMS: 10000
     };
 
     await mongoose.connect(process.env.MONGO_URL, options);
-    
     isConnected = true;
     console.log('Database connected successfully');
+    return Promise.resolve();
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
     isConnected = false;
-    throw error;
+    return Promise.reject(error);
   }
 };
 
 // Handle connection events
 mongoose.connection.on('connected', () => {
   isConnected = true;
-  console.log('MongoDB connected event fired');
 });
 
 mongoose.connection.on('error', (err) => {
@@ -43,8 +43,16 @@ mongoose.connection.on('error', (err) => {
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected');
   isConnected = false;
+});
+
+// Clean up connection on process termination
+process.on('SIGINT', async () => {
+  if (isConnected) {
+    await mongoose.connection.close();
+    isConnected = false;
+    process.exit(0);
+  }
 });
 
 module.exports = connectDB;
