@@ -49,7 +49,7 @@ exports.getAllProjects = async (req, res) => {
         const projects = await Project.find();
 
         if (!projects || projects.length === 0) {
-            return res.status(404).json({ message: 'No projects found' });
+            return res.status(404).json({ message: 'No projects found' , status: 'error 404: Projects not found'});
         }
 
         res.status(200).json(projects);
