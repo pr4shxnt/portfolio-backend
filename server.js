@@ -17,9 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 
 connectDB();
 
-app.get('/', (req, res) => {
-  res.send('Server is running');
-});
+app.use('/api/projects', require('./Routes/projectRoutes'));
 
 
 if (process.env.NODE_ENV != 'production') {
