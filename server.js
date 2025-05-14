@@ -12,9 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
 app.get('/api/health', async (req, res) => {
   try {
     await connectDB();
@@ -27,12 +25,8 @@ app.get('/api/health', async (req, res) => {
 // Routes
 app.use('/api/projects', require('./Routes/projectRoutes'));
 
-// Handle 404
-app.use((req, res) => {
-  res.status(404).json({ message: 'Not found' });
-});
 
-// Error handler
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ message: 'Internal server error' });
@@ -45,10 +39,6 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Create handler with specific configuration
-const handler = serverless(app, {
-  callbackWaitsForEmptyEventLoop: false
-});
 
 // Export the serverless handler
-module.exports = handler;
+module.exports = app;
