@@ -14,15 +14,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -32,38 +23,16 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/projects', require('./Routes/projectRoutes'));
 
-// Handle 404
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
-});
 
-let handler;
 
-if (process.env.NODE_ENV === 'production') {
-  // Initialize database connection
-  connectDB().then(() => {
-    console.log('Database connected in production mode');
-  }).catch(err => {
-    console.error('Database connection error:', err);
-  });
-  
-  handler = serverless(app);
-  module.exports.handler = async (event, context) => {
-    // Make context callbackWaitsForEmptyEventLoop = false to prevent timeout
-    context.callbackWaitsForEmptyEventLoop = false;
-    return await handler(event, context);
-  };
-} else {
-  // Development mode
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  }).catch(err => {
-    console.error('Failed to start server:', err);
-    process.exit(1);
+
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
 }
+
+// Export the serverless handler
+module.exports = serverless(app);

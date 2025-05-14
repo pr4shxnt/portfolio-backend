@@ -3,41 +3,48 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-let cachedConnection = null;
+let isConnected = false;
 
 const connectDB = async () => {
-  if (cachedConnection) {
-    return cachedConnection;
+  if (isConnected) {
+    console.log('Using existing database connection');
+    return;
   }
 
   try {
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      bufferCommands: false,
       serverSelectionTimeoutMS: 5000,
-      maxPoolSize: 10
+      maxPoolSize: 1
     };
 
-    const conn = await mongoose.connect(process.env.MONGO_URL, options);
+    await mongoose.connect(process.env.MONGO_URL, options);
     
-    cachedConnection = conn;
-    
-    // Handle connection errors after initial connection
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
-    });
-
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
-      cachedConnection = null;
-    });
-
-    console.log('MongoDB Connected successfully');
-    return conn;
+    isConnected = true;
+    console.log('Database connected successfully');
   } catch (error) {
-    console.error(`MongoDB connection error: ${error.message}`);
+    console.error(`Database connection error: ${error.message}`);
+    isConnected = false;
     throw error;
   }
 };
+
+// Handle connection events
+mongoose.connection.on('connected', () => {
+  isConnected = true;
+  console.log('MongoDB connected event fired');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+  isConnected = false;
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
+  isConnected = false;
+});
 
 module.exports = connectDB;
