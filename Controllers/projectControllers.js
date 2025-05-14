@@ -43,15 +43,14 @@ exports.createNewProject = async (req, res) => {
 };
 
 
-
 exports.getAllProjects = async (req, res) => {
-    try {
-        const projects = await Project.find();
-        res.status(200).json(projects);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching projects', error: error.message });
-    }
-}
-
+  try {
+    console.log('👋 Test handler hit');
+    res.status(200).json({ message: 'Working fine' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
