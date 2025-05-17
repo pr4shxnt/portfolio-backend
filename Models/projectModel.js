@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 
 
 const projectSchema = new mongoose.Schema({
-    id:{
-        type: String,
-        required: true,
-        unique: true
-    },
     name:{
         type: String,
         required: true
@@ -20,11 +15,9 @@ const projectSchema = new mongoose.Schema({
             type: String,
             required: true
         }],
-    technologies:[
-        {
-            type: String,
-            required: true
-        }],
+    technologies:{
+        type: [String],
+        required: true},
     github:{
         type: String,
         required: true
